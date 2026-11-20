@@ -1,0 +1,188 @@
+---
+title: "DataXAPI integration"
+description: "Integrate with the DataXAPI tools using LangChain Python."
+---
+
+This guide provides a quick overview for getting started with the DataXAPI [tools](/oss/langchain/tools). DataXAPI serves public social media and market data from Douyin, Xiaohongshu (RedNote), WeChat Official Accounts, WeChat Channels, WeChat Search, Weibo, Bilibili, Zhihu, Kuaishou, Douyin's trend index, TikTok, YouTube, X and Reddit through one API key. For every endpoint, its parameters and price, head to the [DataXAPI endpoint reference](https://dataxapi.com/apis/?ref=langchain).
+
+## Overview
+
+### Details
+
+| Class | Package | Serializable | JS support | Downloads | Version |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| [DataXAPIToolkit](https://github.com/data-x-api/langchain-dataxapi#readme) | [langchain-dataxapi](https://pypi.org/project/langchain-dataxapi/) | ❌ | ❌ | ![PyPI - Downloads](https://img.shields.io/pypi/dm/langchain-dataxapi?style=flat-square&label=%20) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain-dataxapi?style=flat-square&label=%20) |
+
+### Features
+
+- **Find any endpoint for free:** `DataXAPIFind` takes a need in plain words, in English or Chinese, and returns the matching endpoints with price, required parameters and example parameters. It needs no API key.
+- **Call any of the 237 endpoints:** `DataXAPICall` calls an endpoint by its ID with its parameters as an object.
+- **Typed tools for the most used endpoints:** twelve tools, each with its own argument schema and allowed values, generated from DataXAPI's catalog.
+- **No sign-in to a platform account:** no cookies or QR login.
+- **Pay per call; errors are not charged.** Each tool's description states its price, and every answer says what the call cost.
+- **Sync and async:** every tool supports `invoke` and `ainvoke`.
+
+### Tools
+
+{/* tools:start */}
+| Tool | Class | What it returns | Price |
+|---|---|---|---|
+| `dataxapi_find` | `DataXAPIFind` | Endpoints for a need described in plain words, with price and parameters | free |
+| `dataxapi_call` | `DataXAPICall` | Any DataXAPI endpoint by its ID | that endpoint's price |
+| `dataxapi_xiaohongshu_notes_search` | `DataXAPIXiaohongshuNoteSearch` | Search Xiaohongshu notes by terms: title, text, author, engagement counts, images, and a link that opens | $0.02 per call |
+| `dataxapi_douyin_videos_search` | `DataXAPIDouyinVideoSearch` | Search Douyin videos by terms, a page at a time, sorted by relevance, newest or most liked and filtered by time posted: caption, author with follower count, engagement counts | $0.02 per call |
+| `dataxapi_wechat_mp_accounts_articles_list` | `DataXAPIWeChatOfficialAccountArticles` | Get a page of the articles a WeChat Official Account published, newest first: title, digest, link, time published | $0.02 per call |
+| `dataxapi_douyin_videos_comments_list` | `DataXAPIDouyinVideoComments` | Get a page of comments on a Douyin video: text, commenter, likes, reply count, time posted | $0.002 per call |
+| `dataxapi_douyin_videos_metrics` | `DataXAPIDouyinVideoMetrics` | Get a Douyin video's counts as of now, by its ID: plays and likes | $0.002 per call |
+| `dataxapi_wechat_mp_articles_get` | `DataXAPIWeChatArticle` | Get one WeChat Official Account article by its link: title, text, time published, the account's name and IDs | $0.02 per call |
+| `dataxapi_douyin_index_keywords_history` | `DataXAPIDouyinKeywordTrend` | Get the day-by-day search index and composite index of a keyword, or of one to five keywords at once, on Douyin over a date range, from the Douyin index, with the daily averages of the period, of the one before and of a year earlier | $0.006 per call |
+| `dataxapi_wechat_posts_search` | `DataXAPIWeChatSearch` | Get a page of WeChat Search results for search terms: Official Account articles and Channels videos mixed, each saying in type whether it is an article or a video; by relevance, newest or hottest, filtered by time posted, or articles only or videos only: title or description, the source account's name, time published, an article's link (with a band of reads on some), a video's likes and saves | $0.02 per call |
+| `dataxapi_wechat_channels_videos_search` | `DataXAPIWeChatChannelsVideoSearch` | Get a page of WeChat Channels videos for search terms through WeChat Search, by relevance, newest or hottest, filtered by time posted: description, the account's name and avatar, time published, likes and saves, length, cover | $0.02 per call |
+| `dataxapi_xiaohongshu_notes_comments_list` | `DataXAPIXiaohongshuNoteComments` | Get a page of top-level comments on a Xiaohongshu note by ID or link, newest first or hottest first: text, commenter, likes, reply count, time posted | $0.02 per call |
+| `dataxapi_tiktok_videos_search` | `DataXAPITikTokVideoSearch` | Search TikTok videos by keyword, 30 a page; sort by relevance, likes or time posted, and limit how recently they were posted | $0.002 per call |
+| `dataxapi_youtube_videos_transcript_get` | `DataXAPIYouTubeTranscript` | Get the transcript of a YouTube video by ID or link: the whole text and timed segments | $0.002 per call |
+{/* tools:end */}
+
+---
+
+## Setup
+
+To access the DataXAPI tools, you'll need to create a DataXAPI account, get an API key, and install the `langchain-dataxapi` integration package. New accounts get a free trial of up to 333 calls, with no card.
+
+### Credentials
+
+Create a key in the [DataXAPI console](https://dataxapi.com/console/keys/?ref=langchain). It starts with `dx_`.
+
+```python Set API key icon="key"
+import getpass
+import os
+
+if "DATAXAPI_API_KEY" not in os.environ:
+    os.environ["DATAXAPI_API_KEY"] = getpass.getpass("Enter your DataXAPI API key: ")
+```
+
+It's also helpful (but not needed) to set up LangSmith for best-in-class observability/<Tooltip tip="Log each step of a model's execution to debug and improve it">tracing</Tooltip> of your tool calls. To enable automated tracing, set your [LangSmith](/langsmith/observability) API key:
+
+```python Enable tracing icon="flask"
+os.environ["LANGSMITH_API_KEY"] = getpass.getpass("Enter your LangSmith API key: ")
+os.environ["LANGSMITH_TRACING"] = "true"
+```
+
+### Installation
+
+The DataXAPI tools live in the `langchain-dataxapi` package:
+
+<CodeGroup>
+    ```python pip
+    pip install -U langchain-dataxapi
+    ```
+    ```python uv
+    uv add langchain-dataxapi
+    ```
+</CodeGroup>
+
+---
+
+## Instantiation
+
+Instantiate one tool, or get all of them from the toolkit:
+
+```python Initialize tool instance icon="robot"
+from langchain_dataxapi import DataXAPIToolkit, DataXAPIXiaohongshuNoteSearch
+
+tool = DataXAPIXiaohongshuNoteSearch()
+
+tools = DataXAPIToolkit().get_tools()
+```
+
+`DataXAPIToolkit(endpoint_tools=False)` gives only `dataxapi_find` and `dataxapi_call`, which reach every endpoint with a shorter tool list.
+
+---
+
+## Invocation
+
+### Directly
+
+`DataXAPIXiaohongshuNoteSearch` takes `query` (required), and optionally `sort` (`relevance`, `latest`, `popular`, `most_comments` or `most_favorites`), `type` (`video` or `image`), `published_within` (`day`, `week` or `half_year`) and `cursor` for the next page.
+
+```python Call tool icon="rocket"
+tool.invoke({"query": "露营", "sort": "popular"})
+```
+
+```json
+{
+  "endpoint": "xiaohongshu.notes.search",
+  "data": {"items": [{"id": "…", "url": "…", "title": "…", "author": {"name": "…"}, "metrics": {"likes": 48, "comments": 21}}]},
+  "page": {"next_cursor": "…", "has_more": true},
+  "billing": {"amount": "0.02", "currency": "USD", "balance_after": "9.98"},
+  "request_id": "…"
+}
+```
+
+### As a ToolCall
+
+We can also invoke the tool with a model-generated `ToolCall`, in which case a @[`ToolMessage`] will be returned:
+
+```python ToolCall icon="briefcase"
+# This is usually generated by a model, but we'll create a tool call directly for demo purposes.
+model_generated_tool_call = {
+    "args": {"query": "露营", "sort": "popular"},
+    "id": "1",
+    "name": tool.name,
+    "type": "tool_call",
+}
+tool.invoke(model_generated_tool_call)
+```
+
+### Within an agent
+
+We can use the toolkit in an agent. For this we will need a model with tool-calling capabilities.
+
+```python Agent with tool icon="robot"
+# pip install -qU "langchain[anthropic]" to call the model
+from langchain.agents import create_agent
+
+agent = create_agent(
+    model="claude-sonnet-4-6",
+    tools=DataXAPIToolkit().get_tools(),
+)
+
+# Run the agent
+agent.invoke(
+    {
+        "messages": [
+            {
+                "role": "user",
+                "content": "What do people on Xiaohongshu and Douyin say about camping coffee gear this week? "
+                "Pick the three most liked posts and summarize their top comments.",
+            }
+        ]
+    }
+)
+```
+
+---
+
+## Find and call any endpoint
+
+For data without a named tool, an agent describes the need to `dataxapi_find` (free) and calls the endpoint it returns with `dataxapi_call`:
+
+```python Find and call icon="search"
+from langchain_dataxapi import DataXAPICall, DataXAPIFind
+
+DataXAPIFind().invoke({"query": "bilibili user profile"})
+
+DataXAPICall().invoke({"endpoint": "bilibili.users.get", "params": {"id": "8047632"}})
+```
+
+## Pages and errors
+
+One call returns one page. For the next, call again with `cursor` set to the last answer's `page.next_cursor`; each page is charged on its own.
+
+An error comes back as the tool's answer, naming the error code, whether anything was charged and whether to retry, so an agent can correct itself. Pass `handle_tool_error=False` to raise `ToolException` instead.
+
+---
+
+## API reference
+
+For every DataXAPI endpoint, its parameters, fields and price, head to the [endpoint reference](https://dataxapi.com/apis/?ref=langchain) and the [API docs](https://dataxapi.com/docs/?ref=langchain). The package source is on [GitHub](https://github.com/data-x-api/langchain-dataxapi).
