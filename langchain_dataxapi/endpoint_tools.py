@@ -1,6 +1,6 @@
 """One LangChain tool per DataXAPI endpoint most used by DataXAPI's customers.
 
-Written by scripts/generate_tools.py from catalog dc959672dd18e2d0, price book 21. Do not edit by hand:
+Written by scripts/generate_tools.py from catalog 0051cce45e9530b9, price book 22. Do not edit by hand:
 run the script again.
 """
 
