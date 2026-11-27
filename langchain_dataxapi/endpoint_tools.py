@@ -1,6 +1,6 @@
 """One LangChain tool per DataXAPI endpoint most used by DataXAPI's customers.
 
-Written by scripts/generate_tools.py from catalog 0051cce45e9530b9, price book 22. Do not edit by hand:
+Written by scripts/generate_tools.py from catalog 0264e2d6dd4ff743, price book 23. Do not edit by hand:
 run the script again.
 """
 
@@ -241,12 +241,6 @@ class DataXAPIWeChatArticle(DataXAPIEndpointTool):
 class DataXAPIDouyinKeywordTrendInput(BaseModel):
     """Arguments of dataxapi_douyin_index_keywords_history."""
 
-    since: str = Field(
-        description='The first day wanted: the China-time (UTC+8) calendar day this moment falls on; 2026-09-01 means 1 September. Example: "2026-09-01T00:00:00Z".'
-    )
-    until: str = Field(
-        description='The last day wanted, read the same way. The platform publishes a day or two late: a day it has no figure for yet has a null index. Example: "2026-09-30T00:00:00Z".'
-    )
     keyword: str | None = Field(
         default=None,
         description='One keyword, at most 50 characters and without a comma; letter case does not matter. Example: "咖啡".',
@@ -254,6 +248,14 @@ class DataXAPIDouyinKeywordTrendInput(BaseModel):
     keywords: list[str] | None = Field(
         default=None,
         description='One to five keywords, each at most 50 characters and without a comma; letter case does not matter. One item comes back per keyword that has figures; a keyword the index does not cover is not in the answer. Example: ["咖啡", "CityWalk"].',
+    )
+    since: str | None = Field(
+        default=None,
+        description='The first day wanted: the China-time (UTC+8) calendar day this moment falls on; 2026-09-01 means 1 September; left out, the 30 days that end on until. Example: "2026-09-01T00:00:00Z".',
+    )
+    until: str | None = Field(
+        default=None,
+        description='The last day wanted, read the same way. The platform publishes a day or two late: a day it has no figure for yet has a null index; left out, yesterday. Example: "2026-09-30T00:00:00Z".',
     )
 
 
@@ -268,7 +270,7 @@ class DataXAPIDouyinKeywordTrend(DataXAPIEndpointTool):
             from langchain_dataxapi import DataXAPIDouyinKeywordTrend
 
             tool = DataXAPIDouyinKeywordTrend()
-            tool.invoke({"since": "2026-09-01T00:00:00Z", "until": "2026-09-30T00:00:00Z", "keyword": "咖啡"})
+            tool.invoke({"keyword": "咖啡"})
     """
 
     name: str = "dataxapi_douyin_index_keywords_history"
@@ -276,11 +278,7 @@ class DataXAPIDouyinKeywordTrend(DataXAPIEndpointTool):
     args_schema: type[BaseModel] = DataXAPIDouyinKeywordTrendInput
     endpoint: ClassVar[str] = "douyin.index.keywords.history"
     one_of: ClassVar[tuple[str, ...]] = ("keywords", "keyword")
-    example: ClassVar[dict[str, Any]] = {
-        "since": "2026-09-01T00:00:00Z",
-        "until": "2026-09-30T00:00:00Z",
-        "keyword": "咖啡",
-    }
+    example: ClassVar[dict[str, Any]] = {"keyword": "咖啡"}
 
 
 class DataXAPIWeChatSearchInput(BaseModel):
